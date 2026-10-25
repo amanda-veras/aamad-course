@@ -2,74 +2,79 @@
 
 ## Executive Summary
 
-Customer support is a high-value domain for multi-agent automation because support teams face persistent pressure to reduce handle time, improve first-contact resolution, preserve service quality, and scale across channels without linearly increasing headcount. Generative AI adoption in service operations is accelerating, with vendors and analysts consistently identifying customer support as one of the strongest near-term enterprise AI use cases. The market opportunity is strongest for small-to-midmarket SaaS and digital-service teams that need automation, triage, knowledge retrieval, and human handoff, but cannot justify heavy enterprise implementation programs.
+The product is a general-purpose Multi-Agent Customer Support Crew that assists support teams across customer service environments. It prepares five reviewable specialist outputs: ticket classification, knowledge retrieval, sentiment/context analysis, response generation, and escalation recommendation. A fictional enterprise e-commerce support workflow is the primary capstone demonstration, not a restriction on the product's intended applicability.
 
-The proposed Capstone Project Multi-Agent Customer Support Crew is technically feasible as an MVP if scope is constrained to a controlled support workflow: ingest a customer message, classify intent and urgency, retrieve relevant knowledge, draft a response, perform quality/safety checks, and escalate to a human when confidence is low or policy risk is high. A multi-agent pattern is justified when the system separates specialist responsibilities such as triage, retrieval, response drafting, policy/compliance review, sentiment detection, and supervisor routing.
+The MVP accepts synthetic tickets and available fictional records, identifies missing or conflicting evidence, retrieves approved guidance, and presents grounded drafts and recommendations for human review. For the demonstration, a Tier 2 engineer reviews customer order/payment discrepancies, dealer order/inventory discrepancies, and order routing/location-assignment issues; shop access may be included. Support staff decide the response or next investigation step. The crew does not send messages, transfer tickets, or modify production systems.
 
-The recommended approach is to build a demonstrable, auditable support automation crew for a realistic SaaS support scenario. The MVP should prioritize correctness, traceability, handoff quality, and measurable workflow outcomes over broad omnichannel coverage. Market research should be treated as directional because capstone constraints are educational; production claims should be validated later with benchmark tickets, stakeholder review, and current vendor pricing.
+Customer-support AI research below provides broader market context, not a validated business case for this crew. Commercial demand, differentiation, return on investment, and pricing remain hypotheses; the capstone should prioritize grounding, traceability, human review, and measurable performance on synthetic cases.
 
 ## Research Query Structure
 
-**Primary Focus**: Multi-agent AI customer support crew for SaaS or digital-service companies.  
+**Primary Focus**: General-purpose multi-agent customer support crew; fictional enterprise e-commerce Tier 2 support is the primary demonstration scenario.
+
 **Selected Runtime**: `crewai`
+
+## Stakeholder-Defined Product Requirements
+
+- The product supports customer service teams with ticket classification, knowledge retrieval, sentiment/context analysis, response generation, and escalation recommendations across support domains.
+- The capstone illustrates this workflow with fictional e-commerce tickets about customer order/payment, dealer order/inventory, and routing/location assignments; shop access is an optional additional example. These are demonstration cases, not product-domain limits.
+- Every customer-facing draft and escalation recommendation goes to a human support reviewer for a final decision (a Tier 2 engineer in the demonstration). The crew may automate internal analysis but cannot send, transfer, or change customer or production records in the MVP.
+- The product exposes five distinct specialist outputs; the SAD and Build phase decide how many CrewAI agents produce them.
+- These requirements come from stakeholder elicitation, not from the market sources below. The e-commerce payment rules and proposed test cases in section 3 illustrate their use in the capstone.
 
 ## 1. Market Analysis & Opportunity Assessment
 
 ### Key Insights
 
-- Customer support is one of the clearest AI automation opportunities because it combines repetitive knowledge work, structured escalation paths, measurable service-level goals, and large volumes of text interactions.
-- Buyers are increasingly receptive to AI-assisted service if the system improves speed without degrading trust, empathy, or issue resolution quality.
-- The most attractive initial segment is SaaS and digital operations teams with existing help-center content, ticketing workflows, and measurable customer support KPIs.
-- Market gaps remain around trustworthy automation, contextual handoff to humans, transparent reasoning, multilingual consistency, and governance of AI-generated responses.
-- A capstone MVP can compete as a workflow demonstration rather than a full Zendesk/Intercom replacement by focusing on explainable multi-agent orchestration.
+- The cited McKinsey analysis [2] is a background research lead on potential productivity in customer operations; its page could not be retrieved for verification and it is not evidence of a benefit for this crew.
+- Salesforce's current State of Service landing page describes investment in agentic AI [3]; this vendor-reported signal does not establish willingness to pay for this capstone.
+- The stakeholder-defined product is a general customer support crew; the fictional e-commerce Tier 2 workflow is a demonstration scenario, not a market segment inferred from these reports.
+- Transparent specialist outputs, grounded drafting, and human review are design goals to test, not proven competitive advantages.
 
 ### Data Points
 
-- Gartner has projected conversational AI will reduce contact-center agent labor costs by billions of dollars globally, indicating high enterprise interest in support automation.
-- McKinsey estimated generative AI could unlock substantial productivity value in customer operations through better agent assistance, self-service, and content generation.
-- Salesforce and Zendesk customer experience reports show service organizations are investing in automation, knowledge management, personalization, and AI-assisted support.
-- IBM's 2024 breach research reports that data breaches remain costly, making security, access control, and privacy central requirements for AI support systems handling customer data.
+- Salesforce's State of Service landing page states that 79% of service professionals are investing in agentic AI [3]. This is a vendor-reported statistic, not an independently checked sample or a forecast for this product.
+- NIST's AI RMF 1.0 (released January 2023) provides voluntary guidance for incorporating trustworthiness in AI design and evaluation [7]. This informs risk management, not market size.
+- Gartner's older forecast URL [1] was unavailable during this revision; McKinsey's report page [2] could not be retrieved. Neither is used here as verified quantitative evidence.
 
 ### Source Citations
 
-- Gartner, customer service and support AI research, 2022-2024.
-- McKinsey Global Institute, "The economic potential of generative AI," 2023.
-- Salesforce, "State of Service" research, 2024.
-- Zendesk, "CX Trends" research, 2024.
-- Intercom, customer service AI and support automation reporting, 2024.
-- IBM, "Cost of a Data Breach Report," 2024.
+- [3] Salesforce, State of Service landing page (current page; report methodology/year to verify before quoting study results).
+- [7] NIST, AI Risk Management Framework 1.0 (2023).
+- [1, 2, 4-6] Background leads only; the listed pages were not independently verified as edition-specific research for this revision. In particular, [1] is unavailable and [6] now serves a rolling 2026 edition.
 
 ### Implications
 
-The product should be positioned as an AI support operations assistant that improves triage, response drafting, and escalation quality. It should avoid promising full automation for all tickets. The strongest business case is reduced time-to-first-response, lower manual triage load, faster knowledge retrieval, and improved consistency of customer-facing answers.
+The product addresses general support operations through reviewable analysis, drafting, and escalation recommendations. Faster investigation, more consistent drafting, and less review effort are outcomes to measure against a manual baseline, not established benefits. The fictional e-commerce case grounds the capstone evaluation; neither SaaS nor e-commerce is an exclusive target market established by this research.
 
 ### Existing Solutions & Limitations
 
 | Solution Category | Representative Solutions | Strengths | Limitations For This Capstone Opportunity |
 | :-- | :-- | :-- | :-- |
-| Enterprise CRM/service platforms | Salesforce Service Cloud, ServiceNow Customer Service Management, Microsoft Dynamics 365 Customer Service | Deep CRM integration, case management, reporting, enterprise governance | High setup effort, complex licensing, slower experimentation, and heavier configuration than a capstone MVP requires |
-| Helpdesk AI suites | Zendesk AI, Intercom Fin, Freshdesk Freddy AI, HubSpot Service Hub AI | Mature ticketing workflows, customer-facing automation, knowledge-base integration, analytics | Often optimized for their own platform ecosystem; limited transparency into internal agent reasoning; customization can depend on paid tiers and proprietary workflows |
-| Generic chatbot builders | Dialogflow CX, Amazon Lex, Azure Bot Service, Botpress | Strong conversation tooling, channel support, intent handling, and handoff patterns | Can feel bot-centric rather than support-operations-centric; multi-agent collaboration, response QA, and auditable specialist roles may require custom orchestration |
-| Agent-assist and contact-center AI | Google Cloud Contact Center AI, NICE, Genesys Cloud AI, Five9 AI | Real-time agent assistance, voice/contact-center coverage, enterprise deployment patterns | Broad contact-center scope can be excessive for a capstone; implementation often assumes established telephony, CRM, and enterprise data pipelines |
-| Open-source or framework-based agent systems | CrewAI, LangGraph, AutoGen, Semantic Kernel | Flexible orchestration, role-specific agents, rapid prototyping, runtime control | Require more product design, evaluation, guardrails, and UI work; production reliability depends on custom engineering discipline |
+| Enterprise CRM/service platforms | Salesforce Service Cloud, ServiceNow Customer Service Management, Microsoft Dynamics 365 Customer Service | Case-management and integration options | Live enterprise integration is outside the synthetic MVP; comparative cost or implementation effort has not been measured |
+| Helpdesk AI suites | Zendesk AI, Intercom Fin, Freshdesk Freddy AI, HubSpot Service Hub AI | Vendor-described ticketing and AI-assist features [13-17] | Role-output visibility and evidence review require product-by-product evaluation; no superiority claim is made |
+| Generic chatbot builders | Dialogflow CX, Amazon Lex, Azure Bot Service, Botpress | Conversation and channel tooling | Fit for a reviewable multi-agent support workflow has not been compared |
+| Agent-assist and contact-center AI | Google Cloud Contact Center AI, NICE, Genesys Cloud AI, Five9 AI | Agent-assist and contact-center options | Voice/contact-center breadth is not part of this MVP; no cost comparison is available |
+| Open-source or framework-based agent systems | CrewAI, LangGraph, AutoGen, Semantic Kernel | Orchestration options; CrewAI is the selected runtime [12] | Each still requires product-specific evaluation, guardrails, and UI design |
 
-Common limitations across existing solutions are vendor lock-in, limited explainability of multi-step AI decisions, weak support for showing role-specific agent outputs to human reviewers, uncertain hallucination controls when knowledge is stale, and insufficient portability across support channels. These gaps support a capstone product strategy centered on transparent CrewAI agent roles, grounded evidence, human approval, and evaluation-ready support workflows.
+This is a qualitative landscape, not a benchmark of competitors. Whether existing tools lack the desired review workflow or whether this design improves outcomes is unverified. The MVP will demonstrate inspectable specialist outputs, cited evidence, and human decisions using synthetic e-commerce examples.
 
 ## 2. Technical Feasibility & Requirements Analysis
 
 ### Key Insights
 
 - A multi-agent architecture is appropriate when the workflow benefits from role separation: intake, triage, retrieval, draft generation, QA, escalation, and reporting.
-- Retrieval-augmented generation is essential; free-form model answers without source grounding create unacceptable hallucination and policy risk.
+- Responses must be grounded in approved knowledge with reviewable citations; the SAD determines the retrieval and grounding approach. Unsupported free-form answers create unacceptable hallucination and policy risk.
 - The MVP can use a lightweight knowledge base, synthetic ticket dataset, and mock CRM/helpdesk integrations before production APIs are introduced.
-- Human approval should be required for refund, billing, security, legal, account-access, and angry-customer escalations.
-- Runtime selection should be based on local developer ergonomics, observability, tool-calling support, and ease of representing explicit agent roles.
+- Human reviewer approval is required for every draft and escalation recommendation (Tier 2 in the capstone demonstration); evidence and procedural limits, rather than sentiment alone, determine whether further assessment or specialist referral is recommended.
+- Five distinct specialist outputs are required: classification, knowledge retrieval, sentiment/context analysis, response generation, and escalation recommendation. These are product outputs, not a mandate for five CrewAI agents; the SAD and Build phase determine orchestration and agent boundaries.
+- CrewAI is the selected runtime; implementation details and the orchestration pattern remain architecture decisions.
 
 ### Data Points
 
 - NIST AI Risk Management Framework identifies validity, reliability, safety, security, resilience, accountability, transparency, explainability, privacy, and fairness as key AI trustworthiness dimensions.
 - OWASP Top 10 for LLM Applications identifies prompt injection, sensitive information disclosure, insecure output handling, excessive agency, and supply-chain risks as major design concerns.
-- Modern AI support vendors commonly combine automation with human handoff, knowledge retrieval, analytics, and workflow integrations rather than relying on a single chatbot.
+- Vendor product pages describe combinations of AI assistance, knowledge retrieval, and support workflow features [13-17]; feature comparisons require direct verification.
 
 ### Source Citations
 
@@ -82,66 +87,95 @@ Common limitations across existing solutions are vendor lock-in, limited explain
 
 ### Implications
 
-The system architecture should include a ticket intake layer, knowledge retrieval layer, agent orchestration layer, policy guardrails, audit logging, and human escalation workflow. The capstone can defer production-grade integrations while still designing extension points for Zendesk, Intercom, Salesforce Service Cloud, Freshdesk, Slack, and email.
+The product needs simulated ticket intake, approved-knowledge retrieval, reviewable outputs, policy guardrails, and an audit trail for support-staff decisions. The SAD should determine the implementation; production integrations are outside MVP scope.
 
 ## 3. User Experience & Workflow Analysis
 
 ### Key Insights
 
-- Support agents need fast, reviewable recommendations, not opaque automation that creates additional verification work.
+- Support staff need reviewable investigations across issue types; the capstone will illustrate this with e-commerce customer and dealer order/payment, inventory, and routing/location-assignment tickets.
 - Customers value quick responses, but poor or incorrect automated replies can increase frustration and ticket volume.
-- Managers need visibility into escalation reasons, confidence levels, recurring issues, and knowledge-base gaps.
+- Support reviewers need visibility into escalation reasons, available evidence, unresolved facts, and knowledge-base gaps; manager analytics are a possible later need.
 - The best MVP interface is an operational console showing ticket queue, agent analysis, draft response, cited knowledge, risk flags, and approval controls.
 - Adoption depends on trust: users must be able to see why a response was suggested and what source material supports it.
 
 ### User Journey Mapping
 
-1. Customer submits a support request through a simulated ticket channel.
-2. Intake agent normalizes the message and extracts metadata.
-3. Triage agent classifies intent, urgency, sentiment, and required skill group.
-4. Knowledge agent retrieves relevant help articles, product policy, and similar resolved cases.
-5. Response agent drafts a customer-facing answer with citations or internal rationale.
-6. QA/policy agent checks tone, completeness, hallucination risk, and escalation triggers.
-7. Supervisor route either auto-prepares a response for approval or escalates to a human queue.
-8. Human support user approves, edits, rejects, or requests regeneration.
+1. An unresolved support ticket enters a simulated review queue with its description and available synthetic context. Records may be incomplete or contradictory; the crew makes no assumption that additional or live data is available.
+2. The crew reads the provided fictional ticket context and approved knowledge, identifying absent records, unresolved facts, and evidence needed for verification. It does not query live systems.
+3. The crew presents five distinct outputs to the support reviewer: classification (issue and priority), knowledge retrieval (relevant approved sources), sentiment/context analysis (tone and impact), response generation (grounded draft or explicit inability to answer), and escalation recommendation (assessment/referral rationale or no referral).
+4. The reviewer inspects source references and discrepancies, then approves, edits, rejects, or requests a revised draft and decides any further investigation, customer response, or specialist referral. The crew does not execute these actions.
+
+For the presentation, a Tier 2 engineer reviews fictional customer/dealer order and payment discrepancies, dealer inventory issues, routing/location-assignment issues, and optionally shop-access problems. Routine questions, missing or conflicting records, frustrated customers, and higher-risk discrepancies exercise the same general workflow.
 
 ### Automation Opportunities
 
-- Full automation candidates: acknowledgement messages, category tagging, duplicate detection, knowledge retrieval, sentiment labeling, and summary generation.
-- Partial automation candidates: technical troubleshooting replies, refund requests, account changes, security issues, and cancellation workflows.
-- Human-only candidates for MVP: legal threats, severe dissatisfaction, payment disputes, private account changes, and anything requiring privileged backend action.
+- Internal analysis may automatically prepare classifications, evidence summaries, retrieved passages, sentiment/context assessments, drafts, and recommendations for human review. These outputs are not executed workflow actions.
+- Every customer-facing draft and every human-assessment or specialist-referral recommendation must be reviewed by support staff before use. In the e-commerce demonstration, payment-related tickets receive evidence-based recommendations, not blanket specialist escalation.
+- The MVP cannot send messages or acknowledgements, transfer tickets, or modify orders, payments, inventory, routing, accounts, or other production records. Any later customer-facing or production automation would require a separate decision and safeguards.
+
+### E-Commerce Demonstration: Proposed Payment Triage Rules
+
+These stakeholder-proposed payment examples specialize the general workflow for the fictional e-commerce capstone; they are not mandatory categories for every support environment or findings from market research. The crew assists Tier 2 engineers using synthetic tickets, synthetic order/payment context, and an approved fictional knowledge base; it does not access live systems or transfer tickets automatically.
+
+| Ticket condition | Crew recommendation | Required explanation |
+| :-- | :-- | :-- |
+| Routine payment policy or process question, fully supported by approved knowledge | Draft a grounded response for Tier 2 review without recommending specialist escalation | Cite the applicable policy or procedure |
+| Conflicting payment and order records, missing required evidence, or an inconclusive investigation | Recommend human assessment | Identify the conflict or missing information and what needs verification |
+| Possible duplicate charge, unresolved payment/order mismatch, or other material financial discrepancy | Recommend human assessment regardless of sentiment | State the potential impact without claiming the payment outcome is verified |
+| Evidence indicates investigation beyond Tier 2's information or documented procedures | Suggest Payments or Payment Operations as the specialist team for Tier 2 to consider | Explain why the existing evidence or procedure is insufficient |
+| Applicable policy cannot be retrieved or evidence does not support a reliable conclusion | State the limitation and recommend manual review; do not improvise an answer | Specify the absent source or unresolved fact |
+
+All drafts and escalation recommendations require human review (Tier 2 in these examples). Sentiment may influence tone and contribute to prioritization but must not independently trigger escalation. A recommendation for human assessment does not automatically imply specialist referral.
+
+Proposed acceptance examples for a reviewed synthetic test set:
+
+| Example | Expected decision |
+| :-- | :-- |
+| Approved policy answers a routine payment-process question, with no conflicting records | Grounded draft; Tier 2 review; no specialist referral |
+| Synthetic order and payment records disagree or a necessary record is absent | Human assessment with the conflict or verification gap stated |
+| Calmly worded possible duplicate charge or material financial mismatch | Human assessment despite neutral sentiment |
+| Documented Tier 2 checks cannot resolve a payment discrepancy | Human assessment and a suggested Payments/Payment Operations referral for Tier 2 to decide |
+| No approved policy covers the question | State the knowledge gap; no invented policy or payment outcome; Tier 2 review |
 
 ### Success Metrics
 
 - Time to first draft response.
 - Intent classification accuracy.
-- Escalation precision and recall.
+- Human-assessment recommendation recall on discrepancy cases; unnecessary human-assessment and specialist-referral recommendation rates on routine grounded cases. Measure specialist-referral suggestions separately from human-assessment recommendations.
 - Percentage of drafts accepted with minor or no edits.
 - Knowledge citation relevance.
 - Average human review time per ticket.
 - Safety/policy violation rate.
 
+These are proposed measurements, not accepted targets. Any numeric targets suggested in Define artifacts (including accuracy percentages or response-time limits) are provisional and unvalidated until stakeholders and QA agree on labels, sample composition, risk tolerance, and measurement method using a reviewed synthetic test set and manual-triage baseline.
+
+### Proposed MVP Evaluation Method
+
+- Stakeholders and QA review synthetic support tickets with routine, ambiguous, and higher-risk cases. For the capstone, include fictional customer/dealer tickets spanning routine policy questions, conflicting or missing order/payment evidence, possible duplicate charges, inventory discrepancies, routing/location-assignment issues, and optionally shop access. Include calm high-risk cases and routine cases that do not merit specialist referral. Add a small set of synthetic tickets and approved knowledge from at least one non-e-commerce support domain to probe whether the five-output workflow transfers beyond the capstone.
+- For each ticket, record expected issue/priority labels, available and missing facts, applicable approved knowledge passages, acceptable draft traits, whether human assessment is warranted, whether specialist referral is warranted, and the rationale. Reviewers resolve disputed labels before scoring.
+- Compare classification to expected labels; score retrieved evidence for relevance and coverage, and drafts for support by cited sources, acknowledgment of uncertainty, and absence of invented facts or actions. Record safety/policy violations separately.
+- Score human-assessment recall on cases requiring it; count unnecessary human-assessment recommendations and unnecessary specialist suggestions on routine grounded cases separately. Also check specialist suggestions when documented Tier 2 procedures cannot resolve the issue.
+- Measure time to first draft and human review effort (time, edits, and accepted/rejected drafts) against a manual-review baseline using the same synthetic cases; the capstone reviewer is Tier 2. Report sample sizes, disagreements, and results separately by support domain; a small cross-domain probe does not establish general performance. Set acceptance thresholds only after the test set and measurement rubric are agreed.
+
 ### Implications
 
-The UI should be workflow-centered and auditable. It should not feel like a generic chat demo. The primary user should see ticket state, agent outputs, rationale, confidence, and approval controls in one scanning-friendly interface.
+The UI should be workflow-centered and auditable. A support reviewer should see ticket state, five outputs, cited evidence, unresolved facts, rationale, and review controls in one scanning-friendly interface; confidence scores are optional unless calibrated and validated. The capstone reviewer is a Tier 2 engineer.
 
 ## 4. Production & Operations Requirements
 
 ### Key Insights
 
-- Production use requires strict data handling because customer support tickets can contain PII, secrets, billing details, health information, or account-security data.
+- Future production use would require strict data handling because real support tickets could contain PII, secrets, and financial information; this MVP uses synthetic records only.
 - Observability must track both software reliability and model behavior: latency, cost, tool calls, retrieval quality, escalation rates, and unsafe-output blocks.
 - Prompt and knowledge-base changes should be versioned because support quality can regress when product docs or model instructions change.
 - A safe deployment should include audit trails, role-based access control, rate limits, incident response, and fallback to manual support.
-- Cost control should be built into the architecture through token budgets, caching, retrieval filtering, and escalation thresholds.
+- Future cost controls may include token budgets, caching, and retrieval filtering; escalation decision thresholds remain subject to evaluation.
 
 ### Deployment Architecture
 
-- Frontend: ticket review console for support agents and managers.
-- Backend API: ticket intake, orchestration, persistence, auth, and audit logging.
-- Agent runtime: multi-agent task execution with clear role prompts and tool boundaries.
-- Knowledge store: indexed help-center articles, policies, and historical resolved tickets.
-- Observability: logs, traces, metrics, evaluation results, and model/prompt version metadata.
+- Product-level needs: a support ticket review console, simulated ticket and evidence source, approved fictional knowledge, inspectable specialist outputs, audit trail, and evaluation records.
+- The SAD and Build phase choose API boundaries, persistence, CrewAI agent count, orchestration pattern, and observability implementation. No live helpdesk, order, payment, inventory, or routing access is part of the MVP.
 
 ### Security Considerations
 
@@ -153,33 +187,33 @@ The UI should be workflow-centered and auditable. It should not feel like a gene
 
 ### Implications
 
-The capstone MVP should include architecture placeholders for auth, audit logging, and PII redaction even if integrations are mocked. Security cannot be postponed conceptually because it changes agent boundaries and escalation policy.
+The SAD should account for auditability and tool boundaries even with fictional data. Authentication, PII redaction, and production integrations are future deployment considerations, not a claim that the synthetic MVP handles live customer data.
 
 ## 5. Innovation & Differentiation Analysis
 
 ### Key Insights
 
-- Differentiation comes from transparent specialist-agent collaboration rather than from another generic chatbot interface.
-- A strong capstone can demonstrate agent accountability: each agent produces a bounded artifact such as intent label, retrieved evidence, draft answer, risk assessment, or escalation reason.
+- The proposed design emphasizes inspectable specialist outputs and human review; whether this differentiates it commercially has not been tested.
+- Five bounded outputs (classification, knowledge retrieval, sentiment/context analysis, response generation, escalation recommendation) support review without prescribing one agent per output.
 - Emerging opportunity exists in agent evaluation: measuring whether AI support behavior remains accurate as prompts, models, and help articles change.
-- The solution can be framed as a deployable pattern for support teams that want AI assistance but still require human governance.
+- Future reuse as a deployable support pattern is a hypothesis, not a demonstrated MVP outcome.
 - Future expansion can add live integrations, multilingual routing, proactive issue detection, voice support summarization, and customer-health signals.
 
-### Unique Value Propositions
+### Proposed Product Attributes (Unvalidated)
 
-- Explainable ticket handling pipeline with visible agent roles and audit trail.
-- Human-in-the-loop workflow for high-risk support categories.
+- Reviewable ticket investigation with five visible specialist outputs and an audit trail; implementation agent count is not prescribed.
+- Human review of every draft and escalation recommendation, including routine tickets; Tier 2 performs this review in the capstone.
 - Knowledge-grounded response generation with citation and quality checks.
 - Evaluation-ready design using synthetic and curated support ticket datasets.
-- Runtime-adapter flexibility aligned with the AAMAD methodology.
-- Competitive contrast against existing support AI by exposing each specialist agent's contribution instead of hiding automation behind a single chatbot response.
+- CrewAI runtime selection aligned with the AAMAD methodology; adaptation to other runtimes is outside MVP scope.
+- Five inspectable outputs; comparative advantage over existing products has not been demonstrated.
 
 ### Monetization Strategies
 
-- SaaS subscription priced by support seat, ticket volume, or automation volume.
-- Usage-based pricing for AI-assisted tickets with caps and overage controls.
-- Enterprise tier for custom integrations, audit retention, RBAC, and compliance controls.
-- Professional services for knowledge-base setup and support workflow tuning.
+These are commercial hypotheses for a potential future product, not capstone requirements or validated buyer preferences:
+
+- Seat-based or usage-based pricing could be explored if interviews establish buyer demand and expected review value.
+- Enterprise integrations, governance features, or setup services would require separate discovery and costing; no pricing or ROI claim is supported yet.
 
 ### Implications
 
@@ -191,76 +225,70 @@ For the capstone, differentiation should be shown through the demo workflow, not
 
 - Go if the MVP can ground responses in a controlled knowledge base.
 - Go if escalation rules can be clearly represented and tested.
-- Go if the team can define a realistic support-ticket dataset for evaluation.
-- No-go for production positioning if the system cannot produce audit logs, confidence signals, and human handoff.
-- No-go for autonomous account actions without authentication, authorization, and approval controls.
+- Go if stakeholders and QA can review synthetic support cases (including the e-commerce examples) with expected evidence and decision labels.
+- No-go for MVP handoff if drafts or referral recommendations bypass human review or the crew performs external actions.
+- Production positioning and autonomous actions are outside this capstone; they would need separate evidence, governance, and approval.
 
 ### Technical Architecture Choices
 
-- Prefer a modular multi-agent pipeline over one monolithic prompt.
-- Use retrieval-augmented generation for customer-facing answers.
-- Keep tool permissions role-specific to reduce excessive agency risk.
-- Select runtime during architecture based on implementation simplicity, tracing, and fit with capstone constraints.
-- Store ticket events, agent outputs, source references, and approvals as first-class records.
+- Require five distinct reviewable specialist outputs and evidence-grounded drafts; the SAD decides whether these map to separate CrewAI agents, combined agents, or another orchestration pattern.
+- Limit tools to synthetic data and approved knowledge; the SAD chooses implementation boundaries and audit storage.
+- CrewAI is already selected as the runtime; do not treat runtime selection as an open product decision.
 
 ### Market Positioning
 
-Position the solution as an AI support co-pilot and automation crew for SaaS support teams, especially teams that need faster triage and consistent first responses while retaining human control over sensitive cases.
+Position the product as a general-purpose Multi-Agent Customer Support Crew that prepares grounded, inspectable specialist outputs for human support teams across service environments. Fictional enterprise e-commerce Tier 2 cases demonstrate the workflow; neither those cases nor broader SaaS research establish an exclusive target market, buyer demand, or competitive advantage.
 
 ### Resource Requirements
 
-- Team: product/requirements owner, system architect, frontend engineer, backend/agent engineer, QA/eval owner, security reviewer, DevOps owner.
-- MVP timeline: 2-4 weeks for capstone-quality scope, assuming mocked integrations and a small curated dataset.
-- Budget drivers: model usage, vector storage, logging/monitoring, hosting, and any paid helpdesk APIs.
+- Team roles to plan: product/requirements owner, system architect, frontend engineer, backend/agent engineer, QA/eval owner, security reviewer, DevOps owner.
+- Schedule and cost are unestimated; confirm staffing, synthetic-data preparation, model usage, evaluation effort, and hosting before setting a timeline or budget. Paid helpdesk APIs are outside MVP scope.
 
 ## Risk Assessment Matrix
 
 | Risk Level | Risk | Impact | Mitigation |
 | :-- | :-- | :-- | :-- |
-| High | Hallucinated or policy-incorrect customer response | Customer harm, loss of trust, escalation load | RAG grounding, citations, QA agent, human approval for high-risk categories |
+| High | Hallucinated or policy-incorrect customer response | Misleading draft or recommendation | Approved-knowledge grounding, citations, explicit unknowns, human review of every draft (Tier 2 in the demo) |
 | High | Sensitive data leakage through prompts or logs | Legal, privacy, and security exposure | PII minimization, redaction, access control, retention limits, secure logging |
 | High | Prompt injection through customer messages or knowledge content | Agent manipulation or unsafe tool use | Input isolation, tool allowlists, instruction hierarchy, output validation |
 | Medium | Poor classification or routing accuracy | Slower resolution and support-team frustration | Golden dataset, confusion-matrix tracking, fallback routing |
 | Medium | Weak knowledge-base quality | Inaccurate answers and low adoption | Source curation, freshness metadata, article-gap reporting |
 | Medium | Cost growth from high model usage | Budget overruns | Token budgets, caching, cheaper model tiers for low-risk classification |
 | Medium | User distrust of automation | Low adoption | Explainability, editable drafts, visible citations, feedback capture |
-| Low | Vendor/runtime lock-in | Migration friction | Adapter boundary, portable prompts, runtime-neutral artifacts |
+| Low | Vendor/runtime lock-in in any future product | Migration friction | Revisit portability if reuse beyond the CrewAI capstone becomes a requirement |
 | Low | Demo data lacks realism | Inflated evaluation results | Include messy, ambiguous, and adversarial sample tickets |
 
 ## Actionable Recommendations
 
 ### Immediate Next Steps Within 48 Hours
 
-- Confirm whether the capstone is internal/educational only or intended as a commercial prototype.
-- Choose the initial target support domain, such as SaaS billing, onboarding, account access, or technical troubleshooting.
-- Create a short system description before PRD generation.
-- Define 20-40 representative support tickets with expected category, urgency, escalation label, and ideal response traits.
-- Decide whether MRD should be refreshed with live market research before final presentation.
+- Confirm whether later commercialization research is needed; the general product is demonstrated through synthetic enterprise e-commerce Tier 2 cases.
+- Review synthetic customer/dealer tickets and approved fictional evidence with stakeholders and QA; determine sample size and case balance rather than assuming a target count.
+- Agree on expected classifications, evidence, drafts, human-assessment decisions, and specialist-referral labels before setting numeric thresholds.
 
 ### Short-Term Priorities For Next 30 Days
 
-- Produce PRD and user stories for the MVP support workflow.
-- Select runtime adapter after architecture review.
-- Define agent roles, handoff contracts, and escalation policy.
+- Align PRD and SAD with the general product scope, e-commerce demonstration, human review, and no-action boundary once those artifacts are available.
+- Define five output contracts, human review handoff, and general escalation principles without assuming five agents or imposing payment-specific rules on other domains.
 - Build a narrow ticket review console and mock ticket source.
 - Implement a golden-dataset evaluation suite for classification, retrieval relevance, response quality, safety, and escalation behavior.
 
 ### Long-Term Strategy For 6-12 Months
 
-- Add production helpdesk integrations such as Zendesk, Intercom, Salesforce Service Cloud, or Freshdesk.
-- Expand from draft assistance to controlled workflow automation for low-risk categories.
+- Consider production helpdesk integrations if a later product discovery effort establishes a need; no provider is selected for the MVP.
+- Investigate customer-facing or production workflow automation only as a separately approved future scope, never as a current MVP capability.
 - Add multilingual support, manager analytics, and knowledge-base gap detection.
 - Formalize compliance posture for target industries.
 - Track model and prompt changes through regression evals before release.
 
 ## Sources
 
-1. Gartner, "Gartner Says Conversational AI Will Reduce Contact Center Agent Labor Costs by $80 Billion in 2026," 2022, https://www.gartner.com/en/newsroom/press-releases/2022-08-31-gartner-says-conversational-ai-will-reduce-contact-center-agent-labor-costs-by-80-billion-in-2026
-2. McKinsey Global Institute, "The economic potential of generative AI: The next productivity frontier," 2023, https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-ai-the-next-productivity-frontier
-3. Salesforce, "State of Service" research, 2024, https://www.salesforce.com/resources/research-reports/state-of-service/
-4. Zendesk, "Customer Experience Trends" research, 2024, https://www.zendesk.com/customer-experience-trends/
+1. Gartner, 2022 conversational-AI forecast, legacy URL unavailable at review; not used as verified evidence, https://www.gartner.com/en/newsroom/press-releases/2022-08-31-gartner-says-conversational-ai-will-reduce-contact-center-agent-labor-costs-by-80-billion-in-2026
+2. McKinsey Global Institute, "The economic potential of generative AI: The next productivity frontier," 2023; report page inaccessible at review, https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-economic-potential-of-generative-ai-the-next-productivity-frontier
+3. Salesforce, "State of Service" landing page, current page accessed for its vendor-reported headline; study edition/methodology not checked, https://www.salesforce.com/resources/research-reports/state-of-service/
+4. Zendesk, "Customer Experience Trends" landing page, redirects to a rolling site; edition not checked, https://www.zendesk.com/customer-experience-trends/
 5. Intercom, customer service AI research and reports, 2024, https://www.intercom.com/customer-service-trends
-6. IBM, "Cost of a Data Breach Report 2024," https://www.ibm.com/reports/data-breach
+6. IBM, "Cost of a Data Breach" rolling report page (served 2026 edition at review); not used as 2024 evidence, https://www.ibm.com/reports/data-breach
 7. NIST, "Artificial Intelligence Risk Management Framework (AI RMF 1.0)," 2023, https://www.nist.gov/itl/ai-risk-management-framework
 8. OWASP, "Top 10 for Large Language Model Applications," 2025, https://owasp.org/www-project-top-10-for-large-language-model-applications/
 9. Microsoft Azure Architecture Center, chatbot and AI application architecture guidance, https://learn.microsoft.com/azure/architecture/
@@ -277,24 +305,24 @@ Position the solution as an AI support co-pilot and automation crew for SaaS sup
 ## Assumptions
 
 - The capstone is an educational MVP, not an immediate production deployment.
-- The initial target market is SaaS or digital-service support teams because they commonly have ticket data, help articles, and measurable support KPIs.
-- Live market sizing was not independently refreshed during this artifact creation; sources should be rechecked before external publication or investor-facing use.
-- Runtime is selected as `crewai`; downstream architecture should confirm exact CrewAI project structure, tool boundaries, and observability approach.
-- Market claims are directional and should be validated with stakeholder interviews or survey data if this capstone becomes a commercial product.
+- The simulated support review queue is the proposed starting state for evaluation; the exact ticket fields, available records, and approval UI await stakeholder review. Tier 2 handling is specific to the e-commerce demonstration.
+- No buyer demand, market size, relative advantage, willingness to pay, or ROI has been validated for the general support crew. The cited support-AI research is background only.
+- Commercial or production positioning would require current, edition-specific research, buyer interviews, pricing work, and real-world validation.
 
 ## Open Questions
 
-- Which customer support domain should the MVP simulate: billing, technical support, account access, onboarding, refunds, or a mixed queue?
-- Should the system support customer-facing auto-send in MVP, or only draft-for-human-approval?
-- Which CrewAI orchestration pattern should Build phase use for the MVP: sequential crew, hierarchical crew, or flow-based orchestration?
-- What channels are in scope for MVP: web chat, email, helpdesk tickets, Slack, or simulated tickets only?
-- What are the minimum acceptance thresholds for classification accuracy, escalation recall, and response quality?
-- Are there specific compliance constraints such as SOC 2, GDPR, HIPAA, PCI DSS, or internal data-handling policies?
+- Which synthetic cases and approved policy excerpts will be included for each e-commerce demonstration scenario, and which non-e-commerce support domain and cases will probe broader applicability?
+- What synthetic ticket fields and record types will be available at intake, and how will support reviewers (Tier 2 in the demo) record decisions and review effort?
+- Which CrewAI orchestration pattern and agent boundaries should the SAD/Build phase choose for the five outputs?
+- Which simulated ticket presentation and review controls are needed for the capstone? No live channel integration is in MVP scope.
+- What minimum acceptance thresholds for classification, human-assessment recall, unnecessary recommendations, and draft quality will stakeholders and QA agree to after reviewing the synthetic cases and baseline?
+- If the work moves beyond fictional data, what privacy, security, and compliance constraints would apply to live records?
+- Should inaccessible or rolling research references be replaced with edition-specific reports before external publication?
 
 ## Audit
 
-- Timestamp: 2026-09-27
+- Timestamp: 2026-10-24
 - Persona id: `product-mgr`
-- Action: `create-mrd`
+- Action: `revise-mrd`
 - Artifact path: `project-context/1.define/mrd.md`
 - Resolved `AAMAD_TARGET_RUNTIME`: `crewai`

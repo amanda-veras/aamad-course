@@ -1,490 +1,141 @@
-# Product Requirements Document: Capstone Project Multi-Agent Customer Support Crew
+# Product Requirements Document: Multi-Agent Customer Support Crew
 
 ## 1. Executive Summary
 
-### Problem Statement
+### Problem and Product
 
-Customer support teams for SaaS and digital-service products face rising ticket volume, pressure for fast response times, and growing expectations for accurate, empathetic, personalized service. Repetitive requests such as account access, billing clarification, onboarding help, basic troubleshooting, and policy questions consume support capacity that could otherwise be spent on complex customer issues.
+Support reviewers need a way to inspect ticket triage, relevant guidance, customer context, response drafts, and escalation reasoning together without relying on unsupported answers or delegating decisions to automation. The product is a **general-purpose Multi-Agent Customer Support Crew** for support teams across service environments. Its five independently reviewable specialist outputs are classification, knowledge retrieval, sentiment/context analysis, response generation, and escalation recommendation. Outputs do not imply one agent per output.
 
-Existing AI support products reduce some workload, but many operate as opaque chatbot or helpdesk features. They often hide the reasoning behind classification, retrieved evidence, response drafting, policy checks, and escalation decisions. This creates adoption friction for support agents and managers who need to trust, audit, and improve AI-assisted support workflows.
+The MVP demonstrates this workflow with fictional enterprise e-commerce Tier 2 tickets and a small non-e-commerce synthetic probe. E-commerce is the primary demonstration, not a product-domain restriction. Only synthetic tickets, synthetic records, and an approved fictional knowledge base may be used. Support staff make all customer-facing and referral decisions. The crew cannot send messages, transfer tickets, or change production systems.
 
-The target market for this capstone is small-to-midmarket SaaS and digital-service support teams with existing help-center content and measurable support KPIs. For capstone scope, the product will simulate this environment with representative tickets, a controlled knowledge base, and a human review console.
+Success means reviewers can inspect evidence, uncertainty, all five outputs, and decisions on a labeled synthetic test set. Reduced investigation or review time, market demand, differentiation, and ROI are hypotheses, not established outcomes or launch claims. No market size, pricing, or quantified operational benefit is assumed.
 
-### Solution Overview
+## 2. Market Context and Users
 
-The Capstone Project Multi-Agent Customer Support Crew is a CrewAI-based support operations assistant that processes incoming support tickets through specialist agents. The system will classify ticket intent and urgency, retrieve relevant knowledge, draft a customer response, evaluate the draft for quality and safety, and recommend either human approval or escalation.
+- **Primary user:** Support reviewer assessing an unresolved ticket; a Tier 2 engineer plays this role in the e-commerce demonstration.
+- **Other participants:** Stakeholders and QA curate synthetic tickets, approved fictional knowledge, expected labels, and evaluation rubrics. A specialist team may be suggested for a human decision, but receives no automatic transfer.
+- **User need:** See what the ticket says, which records and guidance are available or missing, what each specialist output concluded, and why a draft or referral is proposed. The reviewer must be able to approve, edit, reject, or request revision without any action being executed by the crew.
+- **Context:** The MRD surveys alternatives qualitatively but does not establish a buyer segment, competitive advantage, or willingness to pay. Commercialization and geographic scope are not MVP decisions.
 
-The product's differentiator is transparent multi-agent collaboration. Instead of presenting only a final chatbot answer, the system shows the support user each agent's contribution: triage label, confidence, retrieved source evidence, drafted response, policy review, escalation rationale, and recommended next action.
+## 3. Product Boundaries and Technical Handoff
 
-Expected MVP outcomes include faster first draft response, improved triage consistency, reduced manual knowledge lookup, better escalation hygiene, and a repeatable evaluation framework for agent behavior.
+- **Selected build runtime:** CrewAI (`AAMAD_TARGET_RUNTIME: crewai`), per workspace configuration. This constrains the implementation, not the product's five-output definition.
+- **Input boundary:** A simulated queue supplies a synthetic ticket and available synthetic records; only approved fictional knowledge is eligible to support policy or process claims. Missing or contradictory inputs are valid cases.
+- **Output boundary:** Analysis, citations, drafts, and recommendations are presented to a human reviewer; none is an executed customer or workflow action.
+- **Architecture ownership:** The SAD decides CrewAI agent count, responsibilities, orchestration/delegation, retrieval/grounding method, output contracts, persistence, interfaces, audit storage, and tool isolation. No particular agent-to-output mapping, hosting platform, live API, or model is required by this PRD.
+- **MVP exclusions:** Live customer data or integrations, outbound acknowledgements or responses, ticket transfers, production mutations, autonomous specialist referrals, customer-facing bots, and production deployment claims.
 
-### Strategic Rationale
+## 4. Functional Requirements and Acceptance Criteria
 
-A multi-agent architecture is appropriate because customer support work naturally separates into distinct responsibilities: intake normalization, intent triage, evidence retrieval, response drafting, policy checking, and supervisor routing. Separating these responsibilities improves observability, makes failures easier to diagnose, and supports human review.
+All requirements below are P0 for the synthetic MVP unless marked optional. Each AC is an observable behavior, not a numerical quality threshold. Test cases in section 7 reference these IDs.
 
-The selected runtime is `crewai`, which fits the capstone because the product needs explicit role-based agents, task orchestration, bounded tools, and readable handoff artifacts. CrewAI should be treated as the Phase 2 runtime constraint, not as the product's entire value proposition.
+| Requirement | General product behavior | Acceptance criteria |
+| :-- | :-- | :-- |
+| FR-01 Intake and evidence boundary | Accept a synthetic ticket with available synthetic context from a simulated queue; do not assume omitted records exist or query live systems. | AC-01: The reviewer can see the ticket and provided records, and absent or conflicting records are identified without fabricated lookups. |
+| FR-02 Classification | Provide issue and priority classification as a separate reviewable output with its rationale. | AC-02: Every test ticket displays an issue/priority assessment; a case with insufficient evidence shows uncertainty rather than unsupported certainty. Labels are compared with the reviewed gold labels. |
+| FR-03 Knowledge retrieval | Present relevant approved fictional knowledge, or explicitly report that no applicable source was found. | AC-03: Retrieved passages are traceable to approved source identifiers; reviewers can judge relevance and coverage against the expected passages; no-match cases expose the gap. |
+| FR-04 Sentiment and context | Present tone and impact assessment independently of issue classification and decision advice. | AC-04: Reviewers can inspect the assessment and its ticket basis; changes in tone alone do not produce a specialist referral or human-assessment recommendation. |
+| FR-05 Response generation | Present a grounded customer-facing draft, or explicitly say when the available evidence cannot support a reliable answer. | AC-05: Factual/policy claims cite approved knowledge or identified ticket records; missing/conflicting information is stated; no unsupported outcome, policy, or action is asserted. |
+| FR-06 Escalation recommendation | Distinguish whether human assessment is warranted from whether a specialist referral is suggested; provide rationale or explicitly recommend neither. | AC-06: The two decisions and reasons are separately reviewable. Material discrepancies or evidence gaps can warrant human assessment without automatically suggesting a specialist; referral requires an evidence/procedure-based reason, never sentiment alone. |
+| FR-07 Five-output review | Present FR-02 through FR-06 as five distinct outputs, each individually inspectable with applicable evidence, rationale, and unresolved facts. | AC-07: A reviewer can examine each output separately for the same ticket and trace supporting sources or missing evidence without inferring implementation agent count. |
+| FR-08 Human decision and no-action boundary | Require human review of every customer-facing draft and every escalation recommendation; allow approval, editing, rejection, or a revision request and a recorded decision on further investigation/referral. Approval records a human decision only; it does not execute the decision. | AC-08: No draft or recommendation bypasses review; reviewer decisions are distinguishable from crew suggestions. Approval and other review controls only record decisions: no customer message, ticket transfer, or external/production record change occurs, including when an output suggests referral. |
+| FR-09 Review trace | Record enough synthetic-case history to reconstruct the input, cited knowledge, five outputs, unresolved facts, and reviewer decisions for evaluation. | AC-09: For a reviewed ticket, QA can identify which available evidence supported each conclusion and what the reviewer changed or decided; unsupported or blocked outputs remain inspectable. |
+| FR-10 Analysis failure visibility | Report agent-level and workflow/orchestration failures without losing the ticket, available inputs, or completed prior outputs. | AC-10: The reviewer can identify the failed step and see preserved inputs and prior outputs; incomplete analysis is visibly marked as failed or incomplete, never as successfully completed or ready for approval. |
 
-Market timing is favorable because generative AI adoption in service operations is accelerating, while support organizations still need trustworthy human-in-the-loop automation rather than uncontrolled auto-replies.
+### Demonstration Cases (Not General Product Rules)
 
-## 2. Market Context & User Analysis
+| Fictional Tier 2 scenario | Coverage to include in synthetic cases |
+| :-- | :-- |
+| Customer order/payment discrepancies | Routine policy question, missing/conflicting payment and order records, possible duplicate charge, and an unresolved discrepancy. |
+| Dealer order/inventory issues | Missing or conflicting dealer order and inventory context; grounded draft or explicit information gap. |
+| Routing/location assignments | Incorrect or unclear order routing/location context with evidence to inspect and a reviewer decision. |
+| Shop access (optional) | An additional approved-knowledge and missing-evidence example if stakeholders include it in the dataset. |
 
-### Target Market / Users
+For payment examples only, a routine supported question should yield a draft without specialist referral; a possible duplicate charge or unresolved mismatch merits human assessment even when calmly worded. A Payments/Payment Operations referral is suggested only when the available evidence or documented Tier 2 procedure cannot resolve the matter. These labels are provisional until the synthetic dataset and rubric are reviewed; they do not define escalation categories for other domains.
 
-Primary target segment: SaaS and digital-service support teams handling recurring product, account, billing, and onboarding tickets.
+### P1 / Future Work
 
-Primary personas:
-
-- Support Agent: Reviews incoming tickets, edits draft responses, resolves routine cases, and escalates complex cases.
-- Support Manager: Monitors queue health, ticket categories, escalation quality, policy adherence, and recurring knowledge gaps.
-- Customer Success Lead: Uses support insights to identify churn risks, onboarding friction, and product education needs.
-- Technical Support Specialist: Handles escalated troubleshooting cases that require deeper product or system knowledge.
-- Product/Operations Stakeholder: Reviews trends, recurring complaints, and knowledge-base improvement opportunities.
-
-Geographic focus for MVP: N/A. The capstone should be English-language and region-neutral unless stakeholders later specify a deployment region or compliance regime.
-
-### User Needs Analysis
-
-Critical pain points:
-
-- Support agents spend too much time reading, categorizing, and summarizing repetitive tickets.
-- Agents must search help articles and policies manually before responding.
-- Managers lack clear visibility into why AI systems choose escalation or draft a given answer.
-- Incorrect automated answers can damage customer trust and increase follow-up volume.
-- Sensitive categories such as billing, account access, refunds, legal concerns, and security incidents require controlled human approval.
-
-Core user journey:
-
-1. A customer ticket enters the simulated support queue.
-2. The support user opens the ticket review console.
-3. The CrewAI support crew analyzes the ticket and returns structured agent outputs.
-4. The user reviews intent, urgency, sentiment, retrieved evidence, draft response, quality checks, and escalation recommendation.
-5. The user approves, edits, rejects, regenerates, or escalates the response.
-6. The system stores the decision, agent outputs, and final status for audit and evaluation.
-
-Adoption barriers:
-
-- Low trust in AI-generated support content.
-- Concern about hallucinated answers or stale knowledge.
-- Fear that automation will bypass human judgment.
-- Lack of clear metrics proving time savings and quality gains.
-
-Success factors:
-
-- Visible source evidence for every drafted answer.
-- Clear confidence and risk signals.
-- Human approval for sensitive or low-confidence cases.
-- Simple queue-based workflow that resembles real support operations.
-- Evaluation dataset that makes quality measurable.
-
-### Competitive Landscape
-
-Existing alternatives include enterprise CRM/service platforms, helpdesk AI suites, generic chatbot builders, contact-center AI, and open-source agent frameworks.
-
-Key limitations identified in the MRD:
-
-- Enterprise platforms can be powerful but expensive and configuration-heavy.
-- Helpdesk AI suites are often tied to proprietary ecosystems and paid tiers.
-- Chatbot builders can be conversation-centric rather than support-operations-centric.
-- Contact-center AI tools can be too broad for a focused MVP and assume mature enterprise infrastructure.
-- Open-source agent frameworks provide flexibility but require careful product, evaluation, guardrail, and UI design.
-
-Differentiation opportunity: build a narrow, auditable, CrewAI-based support crew that exposes specialist agent work products and keeps human review central.
-
-## 3. Technical Requirements & Architecture
-
-### Runtime & Agent Specifications
-
-Selected runtime: `crewai`.
-
-Recommended MVP orchestration: sequential CrewAI workflow with explicit task outputs and a final supervisor decision. The System Architect may later evaluate hierarchical or flow-based orchestration if the workflow needs conditional branching beyond MVP scope.
-
-Required collaboration pattern:
-
-1. Intake Agent receives and normalizes the ticket.
-2. Triage Agent classifies intent, urgency, sentiment, and risk category.
-3. Knowledge Agent retrieves relevant source material from the controlled knowledge base.
-4. Response Agent drafts a customer-facing response using retrieved evidence.
-5. QA/Policy Agent checks the draft for correctness, tone, policy fit, unsupported claims, and escalation triggers.
-6. Supervisor Agent recommends approve, edit, regenerate, or escalate.
-
-Delegation boundaries:
-
-- Agents must not perform account-changing actions in MVP.
-- Agents must not invent product policy or cite sources that were not retrieved.
-- The Response Agent must use Knowledge Agent outputs for product-specific claims.
-- QA/Policy Agent must flag low-confidence, high-risk, or unsupported responses.
-- Supervisor Agent must route sensitive cases to human approval.
-
-### Core Agent Definitions
-
-#### Agent: intake_agent
-
-- role: "Customer support intake specialist"
-- goal: "Normalize incoming tickets into structured support records."
-- tools: ticket parser, metadata extractor, PII redaction helper.
-- runtime notes: CrewAI agent with no delegation; output must include normalized subject, customer message, detected entities, and redaction flags.
-
-#### Agent: triage_agent
-
-- role: "Support triage analyst"
-- goal: "Classify support tickets by intent, urgency, sentiment, and escalation risk."
-- tools: classification schema, routing rules, ticket history lookup when available.
-- runtime notes: CrewAI agent with bounded categories; output must include label, confidence, rationale, and recommended queue.
-
-#### Agent: knowledge_agent
-
-- role: "Knowledge retrieval specialist"
-- goal: "Find relevant help articles, policy snippets, and resolved-case examples for the ticket."
-- tools: knowledge-base search, policy search, source citation formatter.
-- runtime notes: CrewAI agent with retrieval-only authority; output must include source IDs, snippets, and relevance scores.
-
-#### Agent: response_agent
-
-- role: "Customer response drafter"
-- goal: "Draft a concise, empathetic, source-grounded response for human review."
-- tools: response template library, tone guide, retrieved evidence from Knowledge Agent.
-- runtime notes: CrewAI agent must cite retrieved source IDs internally and avoid unsupported claims.
-
-#### Agent: qa_policy_agent
-
-- role: "Support quality and policy reviewer"
-- goal: "Evaluate draft responses for accuracy, tone, safety, policy compliance, and escalation needs."
-- tools: policy checklist, escalation rules, hallucination-risk checklist.
-- runtime notes: CrewAI agent must return pass/fail flags, issue list, and suggested fixes.
-
-#### Agent: supervisor_agent
-
-- role: "Support workflow supervisor"
-- goal: "Recommend the final workflow action based on all prior agent outputs."
-- tools: approval policy, escalation routing matrix, audit event writer.
-- runtime notes: CrewAI agent should produce a final recommendation: approve, edit, regenerate, or escalate.
-
-### Integration Requirements
-
-MVP integrations:
-
-- Simulated ticket source using seeded support tickets.
-- Local or lightweight persisted ticket store.
-- Controlled markdown/JSON knowledge base for help articles and policies.
-- Backend endpoint or service boundary to trigger CrewAI workflow execution.
-- Frontend review console for human support users.
-
-Deferred production integrations:
-
-- Zendesk, Intercom, Freshdesk, Salesforce Service Cloud, HubSpot Service Hub, Slack, and email ingestion.
-- SSO and enterprise identity provider integration.
-- Production vector database or managed retrieval service.
-- Customer/account data APIs with strict authorization.
-
-Authentication and security requirements:
-
-- MVP may use mock user identity, but architecture must preserve an authentication boundary.
-- Agent outputs and user decisions must be stored with timestamps.
-- Sensitive fields must be redacted or flagged before model calls when feasible.
-- Irreversible account, billing, legal, or security actions are out of MVP scope.
-
-Performance and scalability targets:
-
-- Generate complete agent analysis for a ticket within 30 seconds for MVP demo conditions.
-- Support at least 25 seeded tickets in the demo dataset.
-- Support one active reviewer session for MVP; document path to multi-user support as future work.
-
-### Infrastructure Specifications
-
-MVP hosting requirements:
-
-- Local development environment suitable for capstone demonstration.
-- Backend process capable of invoking CrewAI workflows.
-- Frontend served locally or through a lightweight web application framework.
-- File-based or lightweight database persistence acceptable for MVP.
-
-Monitoring and logging requirements:
-
-- Log each ticket workflow run, agent output, confidence score, escalation reason, and human decision.
-- Record prompt/model/runtime version metadata where feasible.
-- Capture failure states for retrieval misses, agent execution errors, timeout, and invalid outputs.
-- Provide basic run summaries for QA and demonstration.
-
-## 4. Functional Requirements
-
-### Core Features (P0)
-
-#### P0-1: Ticket Intake Queue
-
-User story: As a support agent, I want to view a queue of incoming support tickets so that I can choose a ticket for AI-assisted review.
-
-Acceptance criteria:
-
-- The system displays seeded tickets with customer name or anonymized identifier, subject, status, category if known, and received timestamp.
-- The user can select a ticket and view the full customer message.
-- Tickets can move through statuses: new, analyzing, ready for review, approved, escalated, rejected.
-
-#### P0-2: Multi-Agent Ticket Analysis
-
-User story: As a support agent, I want the support crew to analyze a ticket so that I can understand its category, urgency, sentiment, and likely next action.
-
-Acceptance criteria:
-
-- The user can trigger analysis for a selected ticket.
-- The system runs the CrewAI workflow and returns outputs from each required MVP agent.
-- The triage output includes intent, urgency, sentiment, confidence, and rationale.
-- Analysis failure produces a clear error state and does not erase the ticket.
-
-#### P0-3: Knowledge-Grounded Evidence Retrieval
-
-User story: As a support agent, I want to see the sources used for a draft response so that I can verify the answer before sending it.
-
-Acceptance criteria:
-
-- Knowledge Agent returns at least one relevant source for tickets with known knowledge coverage.
-- Each source includes title, source ID, snippet, and relevance explanation.
-- The Response Agent must not make product-specific claims without retrieved evidence.
-- Tickets without sufficient evidence are flagged for escalation or manual review.
-
-#### P0-4: Draft Response Generation
-
-User story: As a support agent, I want a draft response that is empathetic and grounded in approved knowledge so that I can respond faster.
-
-Acceptance criteria:
-
-- The draft response directly addresses the customer's issue.
-- The draft uses a professional, helpful tone.
-- The draft avoids unsupported promises, invented policies, and irreversible actions.
-- The draft is editable before approval.
-
-#### P0-5: QA and Policy Review
-
-User story: As a support manager, I want AI-generated responses checked before approval so that risky or incorrect messages are caught.
-
-Acceptance criteria:
-
-- QA/Policy Agent checks tone, completeness, grounding, policy risk, and escalation triggers.
-- The system displays pass/fail flags and reasons.
-- High-risk categories require human approval and cannot be auto-approved.
-- The system recommends edits or escalation when checks fail.
-
-#### P0-6: Human Review and Final Action
-
-User story: As a support agent, I want to approve, edit, reject, regenerate, or escalate a draft so that I remain in control of customer communication.
-
-Acceptance criteria:
-
-- The user can approve a draft response.
-- The user can edit the draft before approval.
-- The user can reject or request regeneration with a reason.
-- The user can escalate the ticket with an escalation note.
-- The final user action is recorded in the audit log.
-
-#### P0-7: Audit Trail
-
-User story: As a support manager, I want a ticket-level audit trail so that I can review what the agents recommended and what the human decided.
-
-Acceptance criteria:
-
-- The audit trail includes ticket ID, timestamps, agent outputs, selected sources, risk flags, final recommendation, and human action.
-- The audit view is accessible from the ticket detail screen.
-- The system preserves previous outputs after a final action.
-
-### Enhanced Features (P1)
-
-- Regenerate draft response with user-provided guidance.
-- Manager dashboard showing ticket category distribution, escalation rate, average review time, and accepted-draft rate.
-- Knowledge-base gap detection for tickets with poor retrieval results.
-- Bulk analysis for multiple queued tickets.
-- Feedback capture on draft usefulness and source relevance.
-
-### Future Features (P2)
-
-- Live Zendesk, Intercom, Freshdesk, Salesforce, HubSpot, Slack, or email integration.
-- Customer-facing auto-send for low-risk, high-confidence categories.
-- Multilingual ticket classification and response drafting.
-- Voice call transcript summarization.
-- Customer account data lookup with secure authorization.
-- Advanced analytics for churn risk and product feedback trends.
-- Production-grade SSO, RBAC, retention policy, and compliance reporting.
+No additional P1 feature is required for MVP. Potential later work includes live helpdesk integration, production security controls, multilingual support, manager analytics, and customer-facing automation, each subject to separate discovery, approval, and safeguards. None is a current acceptance criterion.
 
 ## 5. Non-Functional Requirements
 
-### Performance Requirements
+| Area | MVP requirement and verification |
+| :-- | :-- |
+| Data and safety | Only synthetic inputs and approved fictional knowledge are accessible to the crew. Include misleading ticket text or knowledge content in safety tests; it must not authorize external actions or unsupported claims. |
+| Traceability | Citations identify the supporting approved passage or available synthetic record. Preserve the relationship between inputs, five outputs, and reviewer decisions for evaluation; the SAD determines storage and audit design. |
+| Reliability | Missing evidence and conflicting records must yield a visible limitation or review need, not a fabricated answer. Agent execution and orchestration failures must show the failed step, preserve available inputs and prior outputs, and prevent incomplete analysis from appearing complete. Recovery and observability details belong to the SAD. |
+| Performance | Record time to first draft and human review time against the same-case manual baseline. No response-time, throughput, concurrency, or availability target is accepted before the evaluation plan and environment are agreed. |
+| Privacy/security | No live PII, financial system credentials, production APIs, or outbound action capability in MVP. SAD and security review must verify that no executable path exists for outbound messaging, ticket transfers, or external/production record mutations, including through approval controls and agent tools. The SAD and security reviewer define isolation, logging, and prompt-injection controls for synthetic data. |
+| Accessibility/usability | Reviewers must be able to inspect each output, cited evidence, missing facts, and decision controls in a clear operational view. Accessibility standard, device support, and exact interaction design need stakeholder confirmation. |
 
-- Complete MVP ticket analysis in 30 seconds or less for typical seeded tickets under local demo conditions.
-- Render ticket queue interactions within 1 second after data is available.
-- Preserve visible progress state while CrewAI analysis is running.
-- Avoid duplicate workflow execution when users click analysis repeatedly.
+## 6. Reviewer Experience
 
-### Security & Compliance
+The reviewer opens an unresolved synthetic ticket, sees supplied context and missing/conflicting facts, inspects each of the five outputs and its sources, then approves, edits, rejects, or requests revision of the draft and decides whether any further investigation or specialist referral should occur. Approval records the reviewer's decision only; it never sends a message, transfers a ticket, or updates an external or production record. A revision request returns a new reviewable draft; it does not trigger sending. Failed analysis shows the failed step and retained context instead of a ready-for-approval result. The reviewer can see when approved knowledge is unavailable and can distinguish the crew's recommendation from their own decision. Tier 2 terminology and payment-specific team names belong only to the e-commerce demonstration.
 
-- Treat support tickets as potentially sensitive data.
-- Redact or flag likely PII before model invocation where feasible.
-- Do not store API keys, model credentials, or secrets in source-controlled files.
-- Keep agent tools least-privileged and role-specific.
-- Require human approval for billing, refund, legal, security, account-access, and highly dissatisfied customer scenarios.
-- Include prompt-injection defensive requirements in architecture and QA planning.
+## 7. Acceptance Test Cases and Evaluation
 
-### Scalability & Reliability
+Stakeholders and QA must agree on a synthetic golden set with expected issue/priority labels, approved passages, available/missing records, acceptable draft traits, human-assessment and specialist-referral decisions, and rationales before scoring. Include routine, ambiguous, contradictory, calm but material-risk, and misleading-input cases across the e-commerce scenarios. Add a small synthetic set with approved knowledge from at least one non-e-commerce support domain to probe transfer; report its results separately rather than claiming proven general performance.
 
-- MVP can run as a single-user local demo, but boundaries must allow later separation of frontend, backend, agent runtime, and storage.
-- Workflow failures must be recoverable at the ticket level.
-- Retrieval failure must route to human review rather than produce unsupported answers.
-- Logs should make failed agent steps diagnosable.
+| Test case | Synthetic setup and observable expectation | Requirements / criteria |
+| :-- | :-- | :-- |
+| TC-01 Routine supported ticket | Approved policy and consistent records: correct issue/priority, relevant cited passage, separate tone/context, grounded draft, neither assessment nor referral, reviewer approves or edits without sending. | FR-01..08 / AC-01..08 |
+| TC-02 Missing or conflicting records | Ticket omits a necessary record or records disagree: uncertainty and gap visible in outputs, no invented outcome, human assessment explained without automatic specialist referral. | FR-01,02,03,05,06,07,09 / AC-01,02,03,05,06,07,09 |
+| TC-03 Calm material discrepancy | Possible duplicate charge or other material mismatch written without frustration: human assessment proposed despite neutral tone; specialist referral only if procedures/evidence justify it. | FR-02,04,05,06 / AC-02,04,05,06 |
+| TC-04 Specialist boundary | Documented Tier 2 checks cannot resolve a synthetic payment discrepancy: explain the procedural limit and suggest Payments/Payment Operations for reviewer decision; no transfer occurs. | FR-05,06,08,09 / AC-05,06,08,09 |
+| TC-05 Knowledge gap | No approved source covers a question: retrieval reports no match, draft states inability or needed verification, reviewer can decide next step without an invented policy. | FR-03,05,06,07 / AC-03,05,06,07 |
+| TC-06 Other e-commerce scenarios | Dealer order/inventory and routing/location tickets, plus shop access if included: verify all five outputs, source links, missing facts, and decision controls without applying payment-specific referral rules. | FR-01..09 / AC-01..09 |
+| TC-07 Non-e-commerce probe | Synthetic ticket and approved knowledge from a distinct support domain: run the same five-output and review tests; report coverage and errors separately from the capstone. | FR-01..09 / AC-01..09 |
+| TC-08 Reviewer and action boundary | Across approved, edited, referral, rejected, and revision-request cases: every draft and recommendation awaits human review; approval records a decision only. Verify reviewer controls, agent tools, and workflow paths have no executable route to outbound messaging, ticket transfer, or external/production mutation. | FR-08,09 / AC-08,09 |
+| TC-09 Misleading input and trace | Ticket or fictional knowledge contains instructions to ignore rules or invent facts: outputs stay within approved evidence and action limits; QA reconstructs sources, unresolved facts, outputs, and review decision. | FR-01,03,05,07,08,09 / AC-01,03,05,07,08,09 |
+| TC-10 Analysis failure | Inject a failure in an agent step and, separately, in workflow/orchestration after an earlier output is produced. In both cases, show the failed step, retain available inputs and prior outputs, and block incomplete analysis from being shown as successfully completed or ready for approval. | FR-09,10 / AC-09,10 |
 
-### Data Requirements
+### Scoring and Provisional Targets
 
-- Seed dataset must include at least 25 support tickets.
-- Dataset should include routine, ambiguous, high-risk, low-confidence, and adversarial/prompt-injection-like examples.
-- Knowledge base must include help articles, policies, and at least a small set of resolved-case examples.
-- Each ticket should have expected labels for intent, urgency, escalation requirement, and ideal response characteristics.
+- **Classification:** Compare issue and priority labels against reviewed expectations; report confusion patterns and ambiguous cases.
+- **Retrieval:** Review cited passage relevance and coverage against the approved knowledge expected for each case; count missing or inappropriate sources.
+- **Grounding and safety:** Inspect factual and policy statements for support by citations, explicit uncertainty, invented facts/actions, unsafe instructions, and policy violations; count violations separately.
+- **Escalation:** Score human-assessment recall on cases requiring it and unnecessary human-assessment recommendations on routine grounded cases. Score specialist suggestions and unnecessary referrals separately. Check neutral-tone material-risk and tone-only cases.
+- **Traceability and oversight:** For each reviewed case, verify five accessible outputs, evidence links or explicit gaps, decision history, and absence of unreviewed or executed actions.
+- **Review effort:** Record first-draft latency, review time, edits, and accepted/rejected drafts; compare with manual review on the same synthetic cases. Report sample sizes, disagreements, and results by domain.
 
-## 6. User Experience Design
+These are testable measures, not accepted numeric targets. Stakeholders and QA must approve the synthetic golden dataset, labeling rubric, manual baseline, risk tolerance, and thresholds before any percentages, time limits, ticket counts, or go/no-go scores become binding.
 
-### Interface Requirements
+## 8. Implementation and Handoff
 
-- Primary interface: support operations console, not a marketing landing page.
-- Required views: ticket queue, ticket detail, agent analysis panel, draft response editor, source evidence panel, QA/policy checklist, audit trail.
-- Layout should support fast scanning by support agents.
-- The UI must clearly distinguish AI-generated content from human-edited content.
-- The UI must be usable on desktop; mobile responsiveness is preferred but not required for MVP unless selected by stakeholders.
+Define: approve this PRD and the synthetic evaluation labels, then hand product constraints to the system architect for SAD/SFS decisions. Build: implement simulated intake, five outputs, reviewer controls, and tests linked to the criteria above using the selected CrewAI runtime. Deliver: package and document the synthetic MVP after QA and security review. Staffing, cost, hosting, and schedule are unestimated. Major risks are unsupported drafts, prompt injection, weak fictional knowledge, inconsistent escalation, and demo-only results being generalized; grounding, explicit unknowns, action isolation, human review, and separate-domain reporting are the product-level mitigations.
 
-### Agent Interaction Design
+## 9. Launch and Market Scope
 
-- The user should see each agent's result as a separate structured output.
-- Confidence and risk signals must be visible near the recommendation they affect.
-- Retrieved evidence should be shown next to or near the draft response.
-- The final action must always be a human-controlled decision in MVP.
-- Error messages should explain whether the failure came from ticket parsing, retrieval, response generation, QA, or orchestration.
-
-### Accessibility and Usability
-
-- Use semantic headings, labels, and keyboard-accessible controls.
-- Maintain readable contrast for ticket status, risk, and confidence indicators.
-- Avoid relying only on color to communicate risk or status.
-- Preserve draft edits during routine UI navigation.
-
-## 7. Success Metrics & KPIs
-
-### Business / Operational Metrics
-
-- Reduce time to first draft response versus manual drafting in demo evaluation.
-- Achieve at least 80% correct intent classification on the MVP golden dataset.
-- Achieve at least 90% recall for tickets that require escalation in the MVP golden dataset.
-- Achieve at least 70% draft acceptance with minor or no edits on routine seeded tickets.
-- Identify knowledge gaps for tickets without sufficient evidence.
-
-### Technical Metrics
-
-- CrewAI workflow completion rate of at least 95% on seeded demo tickets.
-- Typical analysis latency of 30 seconds or less per ticket under demo conditions.
-- Zero unsupported product-policy claims in QA-reviewed accepted responses.
-- Audit log generated for 100% of completed ticket analyses.
-- Retrieval returns relevant evidence for at least 80% of covered knowledge-base scenarios.
-
-### User Experience Metrics
-
-- Support user can review and take final action on a ticket from one primary screen.
-- Support user can identify source evidence for a draft within 10 seconds during usability review.
-- Support user can understand why escalation was recommended without inspecting raw logs.
-- Draft editor supports approve, edit, reject, regenerate, and escalate actions without losing context.
-
-## 8. Implementation Strategy
-
-### Development Phases
-
-Phase 1 (Define):
-
-- Complete MRD.
-- Complete PRD.
-- Generate MVP user stories.
-- Hand off to System Architect for SAD/SFS.
-
-Phase 2 (Build):
-
-- Project Manager scaffolds selected stack and CrewAI runtime conventions.
-- Backend Engineer builds ticket API, knowledge access, persistence, and CrewAI workflow service.
-- Frontend Engineer builds support operations console.
-- Integration Engineer connects frontend, backend, and agent outputs.
-- QA Engineer creates golden dataset tests, unit tests, and integration checks.
-- Security Engineer reviews prompt injection, data handling, tool permissions, and secret management.
-
-Phase 3 (Deliver):
-
-- DevOps Engineer packages local/demo deployment instructions.
-- Produce runbook, environment setup, and user guide.
-- Document known limitations and production hardening requirements.
-
-### Resource Requirements
-
-- Product owner: Define workflow, success metrics, scope control.
-- System architect: CrewAI orchestration, data boundaries, deployment model.
-- Backend/agent engineer: CrewAI implementation, tools, APIs, persistence.
-- Frontend engineer: Ticket review console and agent output UX.
-- QA/evaluation owner: Golden dataset and regression evaluation.
-- Security reviewer: Prompt injection, PII, access control, and auditability.
-- DevOps owner: Packaging, environment setup, and delivery docs.
-
-### Risk Mitigation
-
-- Hallucination risk: require retrieval grounding, source display, and QA checks.
-- Sensitive data risk: redact/flag PII and prevent account-changing actions.
-- Scope risk: keep MVP to simulated tickets and controlled knowledge base.
-- Adoption risk: emphasize human approval, editable drafts, and visible rationale.
-- Runtime risk: keep agent contracts and product requirements portable even though CrewAI is selected for implementation.
-
-## 9. Launch & Go-to-Market Strategy
-
-This section is limited because the capstone is assumed to be an educational MVP, not an immediate commercial launch.
-
-Recommended capstone launch plan:
-
-- Demonstrate a realistic ticket queue with routine, complex, and high-risk tickets.
-- Show end-to-end CrewAI workflow execution with visible specialist outputs.
-- Present before/after comparison of manual support review versus AI-assisted review.
-- Report golden-dataset results for classification, escalation, retrieval relevance, and response quality.
-- Document production hardening gaps before any real customer-data deployment.
-
-Potential commercial positioning if continued after capstone:
-
-- AI support co-pilot for SaaS teams that need transparent automation and human approval.
-- Differentiated from chatbot-only systems by exposing the specialist-agent workflow and audit trail.
-- Initial wedge: support teams with strong knowledge-base content but limited automation engineering capacity.
-
-## Quality Assurance Checklist
-
-- [x] Requirements traceable to MRD, system description, or recorded Assumptions.
-- [x] Technical specifications feasible with the selected runtime adapter.
-- [x] Success metrics aligned with stated objectives.
-- [x] MVP vs Future Work boundaries explicit.
-- [x] Market sections marked N/A where appropriate for educational capstone constraints.
+Public launch, pricing, production integrations, and go-to-market strategy are not part of this educational synthetic MVP. Broader commercial applicability remains unvalidated and would require separate research and real-world evaluation.
 
 ## Sources
 
-- `project-context/1.define/mrd.md`
-- Product Manager persona instructions in `.cursor/agents/product-mgr.md`
-- MRD sources: Gartner customer service AI research; McKinsey generative AI productivity research; Salesforce State of Service; Zendesk CX Trends; Intercom customer service AI reporting; IBM Cost of a Data Breach; NIST AI RMF; OWASP Top 10 for LLM Applications; Microsoft Azure Architecture Center; OpenAI, Anthropic, and CrewAI documentation.
+- [Market Research Document](mrd.md): product scope, five outputs, synthetic workflow, demo-specific payment rules, evidence and oversight boundaries, and proposed evaluation method.
+- Stakeholder requirements in the current PRD request: scope distinction, required outputs, demo scenarios, acceptance mapping, and SAD dependencies.
+- Workspace configuration: `aamad.config.yml` selects CrewAI and requires tests mapped to acceptance criteria. The runtime choice does not mandate five agents.
 
 ## Assumptions
 
-- No separate `project-context/1.define/system-description.md` existed at PRD creation time; this PRD is derived from the MRD and recorded assumptions.
-- The capstone is educational and demo-oriented, not an immediate production rollout.
-- The target support domain is a mixed SaaS support queue until stakeholders choose a narrower domain.
-- MVP uses simulated tickets and a controlled knowledge base rather than live helpdesk/customer integrations.
-- MVP final customer communication requires human approval.
-- `AAMAD_TARGET_RUNTIME` is resolved as `crewai`.
-- Success thresholds are initial Product Manager targets and should be confirmed by QA and stakeholders.
+- The MRD's proposed simulated review queue is the MVP starting point; ticket schema and reviewer controls remain subject to confirmation.
+- Synthetic case authors and QA can supply approved fictional knowledge and expected labels before scoring; until then no numeric target is approved.
+- The non-e-commerce probe tests workflow transfer, not market fit or performance across all support domains.
+- No system-description artifact was provided; this PRD uses the latest MRD and the stakeholder request as its requirements baseline.
 
 ## Open Questions
 
-- Which exact support domain should the MVP emphasize: billing, technical support, onboarding, account access, refunds, or mixed queue?
-- Which frontend/backend stack should Build phase use?
-- Should the MVP include regenerate-with-instructions as P0 or P1?
-- What model provider and embedding/retrieval approach should be used with CrewAI?
-- What is the minimum required size and format for the golden dataset?
-- Are there course-specific rubric requirements that should be added as acceptance criteria?
-- Should the System Architect choose sequential CrewAI workflow for MVP or evaluate hierarchical/flow-based orchestration?
+| Owner | Decision needed |
+| :-- | :-- |
+| Stakeholders / QA | Approve case mix, sample sizes, approved fictional knowledge, expected issue/priority and assessment/referral labels, disagreement process, rubric, manual baseline, and provisional-to-binding thresholds. |
+| Stakeholders / QA | Choose the non-e-commerce support domain and its synthetic cases, and decide whether shop access is included in the e-commerce demonstration. |
+| Stakeholders / reviewer | Confirm simulated ticket fields, available synthetic record types, decision vocabulary, revision behavior, and how review effort is recorded. |
+| System architect (SAD/SFS) | Specify CrewAI agent boundaries and orchestration, output/evidence contracts, grounding approach, action isolation, reviewer handoff, persistence, audit, and agent/workflow failure handling without equating five outputs to five agents. |
+| System architect / security reviewer | Define synthetic data access, prompt-injection defenses, safe logging, accessibility approach, and a verification method proving no executable path exists for outbound messages, ticket transfers, or external/production mutations through reviewer controls, agent tools, or workflows. |
+| Product owner | Confirm any later live-data, production, commercial, or domain-specific policy scope separately; e-commerce payment rules do not apply to every domain. |
 
 ## Audit
 
-- Timestamp: 2026-09-27
+- Timestamp: 2026-10-24
 - Persona id: `product-mgr`
-- Action: `create-prd`
+- Action: `revise-prd`
 - Artifact path: `project-context/1.define/prd.md`
 - Resolved `AAMAD_TARGET_RUNTIME`: `crewai`
