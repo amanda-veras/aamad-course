@@ -11,7 +11,7 @@ const labels: Record<OutputType, string> = {
 };
 
 function stateFor(run: Run): UiState {
-  return run.status === 'analyzing' ? 'running' : run.status === 'failed' ? 'failed' : 'done';
+  return run.status === 'analyzing' ? 'running' : run.status === 'ready_for_review' ? 'done' : 'failed';
 }
 
 export default function App() {
@@ -19,8 +19,28 @@ export default function App() {
   const [run, setRun] = useState<Run | null>(null);
   const [state, setState] = useState<UiState>('idle');
   const [error, setError] = useState('');
-  const [history, setHistory] = useState<Run[]>(() => runService.getHistory());
+  const [history, setHistory] = useState<Run[]>([]);
+  const [historyError, setHistoryError] = useState('');
+  const [historyLoading, setHistoryLoading] = useState(true);
   const selected = tickets.find((ticket) => ticket.id === ticketId)!;
+
+  useEffect(() => {
+    let cancelled = false;
+    runService.getHistory().then((runs) => {
+      if (cancelled) return;
+      setHistory((previous) => {
+        const byId = new Map([...runs, ...previous].map((item) => [item.id, item]));
+        return [...byId.values()].sort((left, right) => right.startedAt.localeCompare(left.startedAt));
+      });
+      setHistoryError('');
+    }).catch((cause) => {
+      if (cancelled) return;
+      setHistoryError(cause instanceof Error ? cause.message : 'Unable to load run history.');
+    }).finally(() => {
+      if (!cancelled) setHistoryLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (state !== 'running' || !run) return;
@@ -30,8 +50,11 @@ export default function App() {
         const updated = await runService.getRunStatus(run.id);
         if (cancelled) return;
         setRun(updated);
-        setHistory(runService.getHistory());
-        if (updated.status !== 'analyzing') setState(nextUiState('running', updated.status === 'failed' ? 'fail' : 'complete'));
+        setHistory((previous) => [
+          updated,
+          ...previous.filter((item) => item.id !== updated.id),
+        ]);
+        if (updated.status !== 'analyzing') setState(nextUiState('running', updated.status === 'ready_for_review' ? 'complete' : 'fail'));
       } catch (cause) {
         if (cancelled) return;
         setError(cause instanceof Error ? cause.message : 'Unable to read run status.');
@@ -50,7 +73,17 @@ export default function App() {
     try {
       const started = await runService.startRun(ticketId);
       setRun(started);
-      setHistory(runService.getHistory());
+      setHistory((previous) => [
+        started,
+        ...previous.filter((item) => item.id !== started.id),
+      ]);
+      setState(stateFor(started));
+      try {
+        runService.rememberRun(started.id);
+        setHistoryError('');
+      } catch (cause) {
+        setHistoryError(cause instanceof Error ? cause.message : 'Unable to save the run history index.');
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to start run.');
       setState(nextUiState('running', 'fail'));
@@ -88,9 +121,9 @@ export default function App() {
               </form>
             </section>
             <section id="run" className="panel" aria-labelledby="run-title">
-              <div className="section-heading"><span className="number">02</span><div><p className="eyebrow">LOCAL PREVIEW</p><h2 id="run-title">Run</h2></div></div>
-              <p className="muted">This stub displays fixture outputs in the five-stage SAD order. It does not run the four CrewAI tasks, the coordinator lookup, a model, a backend, or an external service.</p>
-              <div className="run-actions"><button type="submit" form="ticket-form" disabled={state === 'running'}>{state === 'running' ? 'Running sample…' : 'Start sample run'} <span aria-hidden="true">↗</span></button><span className={`status ${state}`} role="status" aria-live="polite">{state === 'idle' ? 'Idle' : state === 'running' ? 'Running' : state === 'done' ? 'Demo complete' : 'Failed'}</span></div>
+              <div className="section-heading"><span className="number">02</span><div><p className="eyebrow">LOCAL BACKEND</p><h2 id="run-title">Run</h2></div></div>
+              <p className="muted">Runs the local backend against fictional tickets and its deterministic mock. Results are validated locally; no hosted model, live data, or external service is contacted.</p>
+              <div className="run-actions"><button type="submit" form="ticket-form" disabled={state === 'running'}>{state === 'running' ? 'Running sample…' : 'Start sample run'} <span aria-hidden="true">↗</span></button><span className={`status ${state}`} role="status" aria-live="polite">{state === 'idle' ? 'Idle' : state === 'running' ? 'Running' : state === 'done' ? 'Ready for review' : 'Failed'}</span></div>
               {error && <p className="error" role="alert">{error}</p>}
               {run && <p className="muted small">Run {run.id} · Started {new Date(run.startedAt).toLocaleString()} · Ticket {run.ticket.id}</p>}
             </section>
@@ -99,18 +132,33 @@ export default function App() {
               {!run && <p className="empty">Start a sample run or select one from History to inspect its results.</p>}
               {run && state === 'running' && <p className="empty" role="status">Preparing sample outputs for {run.ticket.id}…</p>}
               {run && state === 'failed' && <p className="error" role="alert">Run incomplete. {run.failedStep ? `Failed step: ${run.failedStep}. ` : ''}{run.error ?? error} Available outputs remain below.</p>}
-              {run && state === 'done' && <p className="notice">Sample outputs only — not validated analysis or approved decisions. Human review and decision recording are not implemented.</p>}
+              {run && state === 'done' && <p className="notice">Local synthetic analysis is complete and available for human review. This console does not record reviewer decisions or execute actions.</p>}
               {run?.outputs.map((output, index) => <article className="output" key={output.type}>
                 <div className="output-title"><span className="output-index">0{index + 1}</span><h3>{labels[output.type]}</h3><span className={`tag ${output.status}`}>{output.status}</span></div>
                 <p className="detail">{output.detail}</p><p className="muted">{output.rationale}</p>
-                <div className="evidence"><strong>Sample evidence IDs</strong><p>{output.evidenceRefs.length ? output.evidenceRefs.join(' · ') : 'No applicable source found'}</p>{output.missingFacts.length > 0 && <p><strong>Missing:</strong> {output.missingFacts.join(' · ')}</p>}</div>
+                {output.issue_label && <p><strong>Issue / priority:</strong> {output.issue_label} / {output.priority_label}</p>}
+                {(output.tone || output.impact_context) && <p><strong>Tone / impact:</strong> {output.tone ?? 'Not available'} / {output.impact_context ?? 'Not available'}</p>}
+                {output.matches?.map((match) => <p className="muted" key={`${match.source_id}/${match.passage_id}/${match.version}`}><strong>Approved passage:</strong> {match.source_id}/{match.passage_id}/{match.version} — {match.excerpt}</p>)}
+                {output.draft_text && <p><strong>Draft:</strong> {output.draft_text}</p>}
+                {output.cannot_answer_reason && <p><strong>Cannot answer:</strong> {output.cannot_answer_reason}</p>}
+                {output.claim_refs && output.claim_refs.length > 0 && <p><strong>Claim references:</strong> {output.claim_refs.join(' · ')}</p>}
+                {output.human_assessment_recommended !== undefined && <p><strong>Human assessment:</strong> {output.human_assessment_recommended ? 'Recommended' : 'Not recommended'} — {output.assessment_reason}</p>}
+                {output.specialist_referral_suggested !== undefined && <p><strong>Specialist referral:</strong> {output.specialist_referral_suggested ? 'Suggested' : 'Not suggested'} — {output.referral_reason}</p>}
+                {output.proposed_specialist && <p><strong>Proposed specialist:</strong> {output.proposed_specialist}</p>}
+                {output.no_match && <p><strong>Knowledge search:</strong> No approved match was found.</p>}
+                {output.conflicting_facts && output.conflicting_facts.length > 0 && <p><strong>Conflicting facts:</strong> {output.conflicting_facts.join(' · ')}</p>}
+                {output.error && <p className="error"><strong>Stage error:</strong> {output.error}</p>}
+                <div className="evidence"><strong>Validated evidence references</strong><p>{output.evidenceRefs.length ? output.evidenceRefs.join(' · ') : 'No applicable source found'}</p>{output.missingFacts.length > 0 && <p><strong>Missing:</strong> {output.missingFacts.join(' · ')}</p>}</div>
               </article>)}
             </section>
           </div>
           <aside id="history" className="panel history" aria-labelledby="history-title">
             <div className="section-heading"><span className="number">04</span><div><p className="eyebrow">THIS BROWSER ONLY</p><h2 id="history-title">History</h2></div></div>
-            <p className="muted small">Synthetic run metadata is kept in this browser's local storage. No reviewer decisions are recorded.</p>
-            {history.length === 0 ? <p className="empty">No sample runs yet.</p> : <ul className="history-list">{history.map((item) => <li key={item.id}><button type="button" className="history-item" onClick={() => selectRun(item)} disabled={state === 'running'} aria-label={`View run for ${item.ticket.id} started ${new Date(item.startedAt).toLocaleString()}`}><strong>{item.ticket.id}</strong><span>{item.ticket.subject}</span><small>{new Date(item.startedAt).toLocaleString()} · {item.status === 'analyzing' ? 'Running' : item.status === 'failed' ? 'Failed' : 'Demo complete'}</small></button></li>)}</ul>}
+            <p className="muted small">Run IDs are indexed in this browser; run details are retrieved from the local backend trace. No reviewer decisions are recorded here.</p>
+            {historyError && <p className="error" role="alert">{historyError}</p>}
+            {historyLoading && <p className="empty" role="status">Loading backend history…</p>}
+            {!historyLoading && !historyError && history.length === 0 && <p className="empty">No backend runs yet.</p>}
+            {history.length > 0 && <ul className="history-list">{history.map((item) => <li key={item.id}><button type="button" className="history-item" onClick={() => selectRun(item)} disabled={state === 'running'} aria-label={`View run for ${item.ticket.id} started ${new Date(item.startedAt).toLocaleString()}`}><strong>{item.ticket.id}</strong><span>{item.ticket.subject}</span><small>{new Date(item.startedAt).toLocaleString()} · {item.status === 'analyzing' ? 'Running' : item.status === 'ready_for_review' ? 'Ready for review' : 'Incomplete'}</small></button></li>)}</ul>}
           </aside>
         </div>
       </main>

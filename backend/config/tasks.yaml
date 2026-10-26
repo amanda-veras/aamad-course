@@ -1,0 +1,44 @@
+t1a_classification:
+  description: >-
+    Classify the supplied synthetic ticket and records. Return issue_label,
+    priority_label, rationale, evidence_refs, missing_facts, and
+    conflicting_facts. Never infer absent records.
+  expected_output: ClassificationOutput Pydantic envelope
+  agent: evidence_analyst
+  output_model: ClassificationOutput
+  context: []
+
+t1b_sentiment_context:
+  description: >-
+    Assess tone and impact context independently. Tone alone must not cause
+    assessment or specialist referral.
+  expected_output: SentimentContextOutput Pydantic envelope
+  agent: evidence_analyst
+  output_model: SentimentContextOutput
+  context:
+    - t1a_classification
+
+t3a_response:
+  description: >-
+    Draft a response only from validated ticket, record, and coordinator
+    knowledge references; explicitly state when evidence is insufficient.
+  expected_output: ResponseOutput Pydantic envelope
+  agent: resolution_adviser
+  output_model: ResponseOutput
+  context:
+    - t1a_classification
+    - t1b_sentiment_context
+    - t2_knowledge
+
+t3b_escalation:
+  description: >-
+    Separately decide human assessment and specialist referral with evidence
+    and rationale. Do not execute either decision.
+  expected_output: EscalationOutput Pydantic envelope
+  agent: resolution_adviser
+  output_model: EscalationOutput
+  context:
+    - t1a_classification
+    - t1b_sentiment_context
+    - t2_knowledge
+    - t3a_response
