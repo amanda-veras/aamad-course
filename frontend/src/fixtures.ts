@@ -28,16 +28,16 @@ export function sampleOutputs(ticketId: string): ReviewOutput[] {
       evidenceRefs: [conflict ? 'ticket:SYN-102' : 'ticket:SYN-101'], missingFacts,
     },
     {
-      type: 'knowledge', status: conflict ? 'limited' : 'complete',
-      detail: conflict ? 'No applicable approved passage in this demo' : 'Fictional tracking guide: check the order status in the customer portal.',
-      rationale: conflict ? 'No matching fictional knowledge was provided.' : 'Local sample passage for this synthetic question.',
-      evidenceRefs: conflict ? [] : ['knowledge:TRACK-01/passage-1/v1'], missingFacts,
-    },
-    {
       type: 'sentiment_context', status: 'complete',
       detail: conflict ? 'Concerned tone; possible billing impact' : 'Neutral tone; status inquiry',
       rationale: 'Based on the wording of the synthetic ticket, not a referral trigger.',
       evidenceRefs: [`ticket:${ticketId}`], missingFacts: [],
+    },
+    {
+      type: 'knowledge', status: conflict ? 'limited' : 'complete',
+      detail: conflict ? 'No applicable approved passage in this demo' : 'Fictional tracking guide: check the order status in the customer portal.',
+      rationale: conflict ? 'No matching fictional knowledge was provided.' : 'Local sample passage for this synthetic question.',
+      evidenceRefs: conflict ? [] : ['knowledge:TRACK-01/passage-1/v1'], missingFacts,
     },
     {
       type: 'response', status: conflict ? 'limited' : 'complete',

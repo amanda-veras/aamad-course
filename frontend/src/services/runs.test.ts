@@ -41,7 +41,7 @@ describe('local sample run', () => {
     const completed = await service.getRunStatus(started.id);
     expect(completed.status).toBe('ready_for_review');
     expect(completed.outputs.map((output) => output.type)).toEqual([
-      'classification', 'knowledge', 'sentiment_context', 'response', 'escalation',
+      'classification', 'sentiment_context', 'knowledge', 'response', 'escalation',
     ]);
     expect(completed.outputs.find((output) => output.type === 'knowledge')?.status).toBe('limited');
     expect(createRunService(storage).getHistory()[0].ticket.gaps).toContain('Payment records disagree');

@@ -5,8 +5,9 @@ import { tickets } from './fixtures';
 import { runService } from './services/runs';
 
 const labels: Record<OutputType, string> = {
-  classification: 'Classification', knowledge: 'Approved knowledge',
-  sentiment_context: 'Sentiment & context', response: 'Response draft', escalation: 'Escalation advice',
+  classification: 'T1a · Classification', sentiment_context: 'T1b · Sentiment & context',
+  knowledge: 'T2 · Approved knowledge (coordinator stage)',
+  response: 'T3a · Response draft', escalation: 'T3b · Escalation advice',
 };
 
 function stateFor(run: Run): UiState {
@@ -71,7 +72,7 @@ export default function App() {
         <nav aria-label="Page sections"><a href="#inputs">Inputs</a><a href="#run">Run</a><a href="#results">Results</a><a href="#history">History</a></nav>
       </header>
       <main>
-        <div className="hero"><p className="eyebrow">SYNTHETIC DEMONSTRATION · NO LIVE DATA</p><h1>One ticket. Five perspectives.<br /><em>For human review.</em></h1><p>Inspect a fictional support case, start a sample run, and review each output separately. No message is sent and no ticket is transferred.</p></div>
+        <div className="hero"><p className="eyebrow">SYNTHETIC DEMONSTRATION · NO LIVE DATA</p><h1>One ticket. Five outputs.<br /><em>For human review.</em></h1><p>Inspect a fictional support case, start a sample run, and review each output separately. No message is sent and no ticket is transferred.</p></div>
         <div className="layout">
           <div className="primary">
             <section id="inputs" className="panel" aria-labelledby="inputs-title">
@@ -88,7 +89,7 @@ export default function App() {
             </section>
             <section id="run" className="panel" aria-labelledby="run-title">
               <div className="section-heading"><span className="number">02</span><div><p className="eyebrow">LOCAL PREVIEW</p><h2 id="run-title">Run</h2></div></div>
-              <p className="muted">This stub simulates a run locally. It does not call CrewAI, a model, a backend, or an external service.</p>
+              <p className="muted">This stub displays fixture outputs in the five-stage SAD order. It does not run the four CrewAI tasks, the coordinator lookup, a model, a backend, or an external service.</p>
               <div className="run-actions"><button type="submit" form="ticket-form" disabled={state === 'running'}>{state === 'running' ? 'Running sample…' : 'Start sample run'} <span aria-hidden="true">↗</span></button><span className={`status ${state}`} role="status" aria-live="polite">{state === 'idle' ? 'Idle' : state === 'running' ? 'Running' : state === 'done' ? 'Demo complete' : 'Failed'}</span></div>
               {error && <p className="error" role="alert">{error}</p>}
               {run && <p className="muted small">Run {run.id} · Started {new Date(run.startedAt).toLocaleString()} · Ticket {run.ticket.id}</p>}
